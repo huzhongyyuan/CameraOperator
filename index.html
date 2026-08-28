@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Camera Operator generates object-grounded 6-DoF camera trajectories from language and time-varying 3D target bounding boxes.">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Camera Operator — Object-Grounded Camera Trajectory Generation">
+  <meta property="og:description" content="Language specifies shot intent; dynamic 3D boxes provide frame-wise geometric grounding.">
+  <meta property="og:url" content="https://huzhongyyuan.github.io/CameraOperator/">
+  <meta property="og:image" content="https://huzhongyyuan.github.io/CameraOperator/assets/og-cameraoperator.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Camera Operator: language specifies shot intent while dynamic 3D target boxes ground the camera trajectory.">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>Camera Operator — Object-Grounded Camera Trajectory Generation</title>
+  <link rel="canonical" href="https://huzhongyyuan.github.io/CameraOperator/">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="#top" aria-label="Camera Operator home">
+        <span class="brand-mark" aria-hidden="true">CO</span>
+        <span>Camera Operator</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#overview">Overview</a>
+        <a href="#method">Method</a>
+        <a href="#results">Results</a>
+        <a href="#blockcam">BlockCam</a>
+        <a href="#citation">Citation</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="hero-inner">
+        <div class="venue-line">
+          <span class="venue-badge">ACM Multimedia 2026</span>
+          <span>Camera-ready article</span>
+        </div>
+
+        <h1><span>Camera Operator:</span><br>Object-Grounded Camera Trajectory Generation from Text and 3D Bounding Box Sequences</h1>
+
+        <p class="hero-deck">
+          Language specifies sequence-level cinematographic intent. Dynamic 3D target boxes provide the frame-wise geometry needed to preserve framing, visibility, and viewing direction.
+        </p>
+
+        <div class="authors" aria-label="Authors">
+          <a href="https://orcid.org/0009-0004-9539-3050">Zhongyuan Hu<sup>1</sup></a>
+          <span>·</span>
+          <a href="https://orcid.org/0009-0005-7477-5938">Yue Ma<sup>2,*</sup></a>
+          <span>·</span>
+          <a href="https://orcid.org/0009-0008-9172-6515">Jiangming Wang<sup>3</sup></a>
+          <span>·</span>
+          <a href="https://orcid.org/0000-0001-7703-9315">Ronghui Li<sup>1</sup></a>
+          <span>·</span>
+          <a href="https://orcid.org/0000-0003-0403-1923">Xiu Li<sup>1,†</sup></a>
+        </div>
+        <p class="affiliations"><sup>1</sup>Tsinghua University · <sup>2</sup>Hong Kong University of Science and Technology · <sup>3</sup>Sun Yat-Sen University<br><span>* Project lead. † Corresponding author.</span></p>
+
+        <div class="hero-actions" aria-label="Project links">
+          <a class="button button-primary" href="assets/camera-operator-mm26.pdf">Paper <span aria-hidden="true">↗</span></a>
+          <span class="button button-muted" aria-disabled="true" title="The ACM-assigned DOI is not active yet">DOI pending</span>
+          <span class="button button-muted" aria-disabled="true">Code · coming soon</span>
+          <span class="button button-muted" aria-disabled="true">Model · coming soon</span>
+          <a class="button button-secondary" href="#blockcam">Dataset status</a>
+        </div>
+
+        <figure class="hero-figure">
+          <img src="assets/teaser.webp" alt="Examples of target object trajectories, generated camera trajectories, and downstream video-generation frames." width="2200" height="1445" fetchpriority="high">
+          <figcaption>
+            <strong>Top:</strong> a camera-motion instruction and a dynamic 3D target box sequence condition the generated camera trajectory.
+            <strong>Bottom:</strong> the resulting trajectory can serve as camera control for downstream video generation; projected boxes can additionally provide object-track guidance.
+            <span class="figure-source">Figure 1 of the CC BY 4.0 camera-ready article, converted for web display.</span>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" id="overview">
+      <div class="section-heading">
+        <p class="eyebrow">Core idea</p>
+        <h2>Intent and feasibility play different roles.</h2>
+        <p>Camera motion is underdetermined: a single scene can admit many valid shots. The geometric relation losses define admissible regions instead of requiring exact relation matching to one reference path. Language selects the kind of shot, while target geometry keeps the shot viable over time.</p>
+      </div>
+
+      <div class="insight-grid">
+        <article class="insight-card intent-card">
+          <span class="card-index">01</span>
+          <h3>Language selects intent</h3>
+          <p>A natural-language instruction describes high-level motion such as orbiting, following, approaching, or changing viewing angle.</p>
+        </article>
+        <article class="insight-card geometry-card">
+          <span class="card-index">02</span>
+          <h3>3D boxes ground each frame</h3>
+          <p>Target location alone is not enough. A time-varying box also exposes extent and orientation—the cues needed for scale, composition, and look-at control.</p>
+        </article>
+        <article class="insight-card flow-card">
+          <span class="card-index">03</span>
+          <h3>Flow matching exposes a clean estimate</h3>
+          <p>An intermediate clean trajectory estimate makes projection-space relation supervision available throughout training, not only after generation.</p>
+        </article>
+      </div>
+
+      <div class="task-strip" aria-label="Task definition">
+        <div>
+          <span class="task-label">Inputs</span>
+          <strong>Camera instruction + dynamic 3D target boxes</strong>
+        </div>
+        <span class="task-arrow" aria-hidden="true">→</span>
+        <div>
+          <span class="task-label">Generator</span>
+          <strong>Geometry-conditioned flow matching</strong>
+        </div>
+        <span class="task-arrow" aria-hidden="true">→</span>
+        <div>
+          <span class="task-label">Output</span>
+          <strong>Object-grounded 6-DoF camera trajectory</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-tint" id="method">
+      <div class="section-heading compact">
+        <p class="eyebrow">Method</p>
+        <h2>Geometry-conditioned flow matching</h2>
+        <p>Text and box-state encoders provide complementary conditions to a trajectory transformer. Framing, visibility, look-at, velocity, and acceleration objectives act on the estimated clean trajectory in a shared geometric frame.</p>
+      </div>
+
+      <figure class="paper-figure figure-wide">
+        <a href="assets/method.webp" aria-label="Open the full-resolution Camera Operator architecture figure">
+          <img src="assets/method.webp" alt="Camera Operator architecture showing text and 3D box conditioning, a flow transformer, clean trajectory estimation, and geometric supervision." width="2400" height="1212" decoding="async">
+        </a>
+        <figcaption>Camera Operator architecture. <span class="figure-source">Figure 4 of the CC BY 4.0 camera-ready article, converted for web display.</span></figcaption>
+      </figure>
+    </section>
+
+    <section class="section" id="results">
+      <div class="section-heading">
+        <p class="eyebrow">Qualitative behavior</p>
+        <h2>Preserving the camera–target relation</h2>
+        <p>The paper evaluates text–trajectory alignment, trajectory distribution, and camera–target relation preservation under its reported protocol. The qualitative comparison below illustrates the failure modes that motivate full 3D target grounding.</p>
+      </div>
+
+      <figure class="paper-figure">
+        <a href="assets/comparison.webp" aria-label="Open the full-resolution qualitative comparison figure">
+          <img src="assets/comparison.webp" alt="A three-panel trajectory visualization comparing Camera Operator, GenDoP, and E.T.; the panels annotate camera poses, target boxes, gaze drift, and composition drift." width="2200" height="477" decoding="async">
+        </a>
+        <figcaption>Representative relation-preservation comparison; see the paper for the complete evaluation. <span class="figure-source">Figure 5 of the CC BY 4.0 camera-ready article, converted for web display.</span></figcaption>
+      </figure>
+
+      <div class="center-action">
+        <a class="button button-primary" href="assets/camera-operator-mm26.pdf#page=7">Read the evaluation <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+
+    <section class="section section-dark" id="applications">
+      <div class="section-heading compact inverted">
+        <p class="eyebrow">Downstream use</p>
+        <h2>From trajectories to camera-controlled video</h2>
+        <p>Camera Operator produces camera motion, not RGB video. Its predicted trajectory can be supplied to a downstream camera-controlled video generator, while projected target boxes can support object-motion guidance.</p>
+      </div>
+
+      <figure class="paper-figure dark-figure">
+        <a href="assets/downstream.webp" aria-label="Open the full-resolution downstream video-generation figure">
+          <img src="assets/downstream.webp" alt="Two downstream video-generation examples paired with predicted camera and target trajectories." width="2200" height="750" decoding="async">
+        </a>
+        <figcaption>Downstream examples reported in the paper. Appearance is specified by the content prompt; Camera Operator supplies the camera trajectory. <span class="figure-source">Figure 6 of the CC BY 4.0 camera-ready article, converted for web display.</span></figcaption>
+      </figure>
+    </section>
+
+    <section class="section" id="blockcam">
+      <div class="section-heading">
+        <p class="eyebrow">Dataset</p>
+        <h2>BlockCam</h2>
+        <p>The paper introduces aligned language, dynamic 3D target boxes, and camera trajectories. The publication benchmark and the planned public artifact have different memberships, so their status is stated separately.</p>
+      </div>
+
+      <div class="dataset-grid">
+        <article class="dataset-card">
+          <div class="status-line"><span class="status-dot paper-dot"></span>Described in the paper</div>
+          <h3>BlockCam benchmark</h3>
+          <p class="dataset-number">41K <span>sequences</span></p>
+          <p class="dataset-breakdown">12K real-world + 29K synthetic · 11.2M frames</p>
+          <p>A mixed real/synthetic benchmark described by the camera-ready article. It is the data scope associated with the reported paper protocol.</p>
+        </article>
+
+        <article class="dataset-card release-card">
+          <div class="status-line"><span class="status-dot pending-dot"></span>Release preparation</div>
+          <h3>Strict synthetic candidate</h3>
+          <p class="dataset-number">37,499 <span>sequences</span></p>
+          <p>A repaired-and-audited synthetic-only candidate with 150 frames per sequence. It contains no source video, rendered media, REAL annotations, Unreal project, or Fab asset.</p>
+          <p class="dataset-note">Its membership and splits differ from the accepted-paper protocol; it is not presented as a drop-in reproduction of the main table.</p>
+        </article>
+      </div>
+
+      <div class="release-callout">
+        <div>
+          <strong>BlockCam download is not public yet.</strong>
+          <p>The strict synthetic candidate passed the declared technical geometry, templated-text consistency, and split checks. Public hosting remains pending redistribution-rights review, a dataset license, release notices, and final archive sign-off.</p>
+        </div>
+        <div class="callout-actions">
+          <span class="button button-muted" aria-disabled="true">Code &amp; model · coming soon</span>
+          <span class="button button-muted" aria-disabled="true">Hugging Face · coming soon</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-tint" id="scope">
+      <div class="section-heading compact">
+        <p class="eyebrow">Scope</p>
+        <h2>What Camera Operator currently addresses</h2>
+      </div>
+      <div class="scope-grid">
+        <article>
+          <h3>In scope</h3>
+          <ul class="check-list">
+            <li>Offline camera trajectory generation</li>
+            <li>One designated target subject</li>
+            <li>A known time-varying 3D target box sequence</li>
+            <li>Single-shot clips with continuous target visibility</li>
+          </ul>
+        </article>
+        <article>
+          <h3>Future extensions</h3>
+          <ul class="plain-list">
+            <li>Partial or noisy observations and target re-acquisition</li>
+            <li>Multi-target composition and target switching</li>
+            <li>Shot transitions and broader language</li>
+            <li>Camera-independent normalization and online planning</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section citation-section" id="citation">
+      <div class="section-heading compact">
+        <p class="eyebrow">Citation</p>
+        <h2>Cite Camera Operator</h2>
+        <p>The DOI has been assigned by ACM and will resolve after Digital Library activation.</p>
+      </div>
+
+      <div class="citation-box">
+        <pre id="bibtex"><code>@inproceedings{hu2026cameraoperator,
+  author    = {Hu, Zhongyuan and Ma, Yue and Wang, Jiangming and
+               Li, Ronghui and Li, Xiu},
+  title     = {Camera Operator: Object-Grounded Camera Trajectory
+               Generation from Text and 3D Bounding Box Sequences},
+  booktitle = {Proceedings of the 34th ACM International Conference
+               on Multimedia},
+  year      = {2026},
+  doi       = {10.1145/3767308.3835459}
+}</code></pre>
+        <button class="copy-button" type="button" data-copy-target="bibtex" aria-live="polite">Copy BibTeX</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <strong>Camera Operator</strong>
+        <p>Object-grounded camera trajectory generation.</p>
+      </div>
+      <div class="footer-meta">
+        <p>Dataset-release, correction, and takedown requests: <a href="mailto:huzhongyyuan@gmail.com">huzhongyyuan@gmail.com</a></p>
+        <p>The camera-ready article carries a CC BY 4.0 license. Code, model weights, datasets, and third-party components are governed only by licenses accompanying their respective releases.</p>
+        <p><a href="ASSET_NOTICES.md">Figure and asset notices</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
