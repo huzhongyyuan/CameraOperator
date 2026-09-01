@@ -10,7 +10,7 @@
 
 <p><sup>1</sup>Tsinghua University &nbsp;·&nbsp; <sup>2</sup>Hong Kong University of Science and Technology &nbsp;·&nbsp; <sup>3</sup>Sun Yat-Sen University<br><sup>*</sup>Project lead. &nbsp; <sup>†</sup>Corresponding author.</p>
 
-<p><a href="https://huzhongyyuan.github.io/CameraOperator/"><img src="https://img.shields.io/badge/Project-Page-15803d?style=for-the-badge" alt="Project page"></a> <a href="https://huzhongyyuan.github.io/CameraOperator/assets/camera-operator-mm26.pdf"><img src="https://img.shields.io/badge/Paper-PDF-dc2626?style=for-the-badge&amp;logo=adobeacrobatreader&amp;logoColor=white" alt="Camera-ready paper"></a> <img src="https://img.shields.io/badge/DOI-activation%20pending-6b7280?style=for-the-badge" alt="DOI activation pending"></p>
+<p><a href="https://huzhongyyuan.github.io/CameraOperator/"><img src="https://img.shields.io/badge/Project-Page-15803d?style=for-the-badge" alt="Project page"></a> <a href="https://huzhongyyuan.github.io/CameraOperator/assets/camera-operator-mm26.pdf"><img src="https://img.shields.io/badge/Paper-PDF-dc2626?style=for-the-badge&amp;logo=adobeacrobatreader&amp;logoColor=white" alt="Camera-ready paper"></a> <a href="https://huggingface.co/datasets/huuuuuuuuu/CameraOperator-BlockCam"><img src="https://img.shields.io/badge/Dataset-Hugging%20Face-f59e0b?style=for-the-badge" alt="CameraOperator-BlockCam dataset on Hugging Face"></a> <img src="https://img.shields.io/badge/DOI-activation%20pending-6b7280?style=for-the-badge" alt="DOI activation pending"></p>
 
 **DOI assigned:** `10.1145/3767308.3835459` · ACM activation pending
 
@@ -88,17 +88,17 @@ Camera Operator produces **camera motion, not RGB video**. Its trajectory can co
 
 ## BlockCam and artifact status
 
-The paper describes **BlockCam**, a 41K-sequence benchmark with aligned text, dynamic target-object 3D boxes, and camera trajectories. The planned first public artifact is a separately audited, synthetic-only release candidate; its membership and splits differ from the accepted-paper protocol.
+The paper describes **BlockCam**, a 41K-sequence benchmark with aligned text, dynamic target-object 3D boxes, and camera trajectories. A separately audited, synthetic-only annotation release is now public on [Hugging Face](https://huggingface.co/datasets/huuuuuuuuu/CameraOperator-BlockCam). It contains 37,499 processed annotation-label records; its membership and splits differ from the accepted-paper protocol and it is not a drop-in reproduction of the paper's mixed benchmark.
 
 | Artifact | Status |
 | --- | --- |
 | Project page and camera-ready article | **Available** |
 | Training and inference code | Coming soon |
 | Model weights | Coming soon |
-| BlockCam download | Release preparation; not public |
-| Hugging Face | Coming soon |
+| Synthetic-only BlockCam annotations | **[Available](https://huggingface.co/datasets/huuuuuuuuu/CameraOperator-BlockCam)** |
+| Hugging Face | **[CameraOperator-BlockCam](https://huggingface.co/datasets/huuuuuuuuu/CameraOperator-BlockCam)** |
 
-No code, checkpoint, or dataset download is provided by this repository yet. See the [release status](RELEASE_STATUS.md) for the current public boundary.
+Code and checkpoints are not public yet. The dataset is distributed separately under the license and scope documented in its Hugging Face Dataset Card. See the [release status](RELEASE_STATUS.md) for the current public boundary.
 
 ## Citation
 
@@ -116,7 +116,7 @@ If you use Camera Operator in your research, please cite the ACM Multimedia 2026
 
 ## License and asset notices
 
-The bundled camera-ready article and the listed web-display reproductions of its figures carry the article's CC BY 4.0 license. Code, model weights, BlockCam data or media, Unreal/Fab assets, and third-party components are not licensed as part of this repository release.
+The bundled camera-ready article and the listed web-display reproductions of its figures carry the article's CC BY 4.0 license. The separate synthetic-only [CameraOperator-BlockCam dataset](https://huggingface.co/datasets/huuuuuuuuu/CameraOperator-BlockCam) is released under CC BY 4.0 subject to its own Dataset Card, LICENSE, and NOTICE. Code, model weights, unreleased data or media, Unreal/Fab assets, and third-party components are not licensed as part of this repository release.
 
 [License](LICENSE.md) · [Figure and asset notices](ASSET_NOTICES.md) · [Release status](RELEASE_STATUS.md)
 
